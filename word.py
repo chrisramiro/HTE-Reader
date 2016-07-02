@@ -14,7 +14,7 @@ class Word:
         self.senses = self.make_sense_list(word, part_of_speech)
         self.length = len(self.senses)
         self.viable = True  #becomes false when the word has correlations that are not viable, or has no non-baseline senses
-        if len(self.senses) == 0 or self.senses[0].date == self.senses[-1].date:
+        if len(self.senses) <= 1: #or self.senses[0].date == self.senses[-1].date:
             self.bl_senses = self.senses
             self.nb_senses = []
         else:
@@ -27,15 +27,17 @@ class Word:
                 index += 1
             self.bl_senses = self.senses[:index+1:]
             self.nb_senses = self.senses[index+1::]
-        """if self.senses:
-            self.avg_externality = mean([float(sense.externality) for sense in self.bl_senses])
-            if self.avg_externality > 0.50:
-                self.externality = 1
-            else:
-                self.externality = 0"""
+            if self.senses:
+                self.avg_externality = mean([float(sense.externality) for sense in self.bl_senses])
+                if self.avg_externality > 0.50:
+                    self.externality = 1
+                else:
+                    self.externality = 0
+        self.frequency = 0 #not used initially
         if self.nb_senses:
-            self.num_senses = len(self.nb_senses)
-            """self.nb_dates = [nb_sense.date for nb_sense in self.nb_senses]
+            self.num_nb_senses = len(self.nb_senses)
+            self.num_bl_senses = self.length - self.num_nb_senses
+            self.nb_dates = [nb_sense.date for nb_sense in self.nb_senses]
             self.vs_baseline = [Baseline(bl_sense, self.nb_senses) for bl_sense in self.bl_senses]  #list of baseline senses
             self.vs_baseline = [baseline for baseline in self.vs_baseline if baseline.pearsonR]
 
@@ -58,8 +60,7 @@ class Word:
             try:
                 self.pearson_avg_before = numpy.corrcoef(self.nb_dates, self.avgs_by_date)[0][1]
             except:
-                self.viable = False"""
-
+                self.viable = False
         else:
             self.viable = False #there are no sense to compare against the baseline
 

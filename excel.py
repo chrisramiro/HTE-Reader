@@ -49,7 +49,7 @@ def write_sense_matrix(word):
             cur_cell = ws.cell(row=row, column=col)
             # when a sense is matched with itself, its difference value is maximal
             if row == col:
-                cur_cell.value = "max"
+                cur_cell.value = 0
             else:
                 similarity_score = 0
                 list_range = min(len(word.senses[row-2].listed_cat), len(word.senses[col-2].listed_cat))
@@ -58,7 +58,7 @@ def write_sense_matrix(word):
                         similarity_score += 1
                     else:
                         break
-                cur_cell.value = similarity_score
+                cur_cell.value = exp(-similarity_score)
 
 
     save_loc =  os.getcwd() + "\\Sense Matrices\\" + "[" + word.PoS + "] " + word.label + ".xlsx"
