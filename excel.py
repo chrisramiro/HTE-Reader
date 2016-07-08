@@ -272,6 +272,111 @@ def create_sense_by_n(input_row, baseline_index, word, worksheet):
     worksheet.cell(row=input_row, column=length+2).value = "Pearson R"
     worksheet.cell(row=input_row+1, column=length+2).value = vs.pearsonR
 
+def write_definitive_bnc():
+
+    b_pear, b_freq, b_aext, b_nums, b_len = [], [], [], [], []
+    bnc = load_workbook(filename='BNC - Noun, Verb, Adj, Adv only - Valid Only - Order Sort.xlsx')
+    ws = bnc.active
+
+    fig, axes = plt.subplots(nrows=2, ncols=5)
+    ax0, ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8, ax9 = axes.flat
+
+    for i in range(2, 502):
+        b_pear.append(ws.cell(row=i, column=10).value)
+        b_freq.append(np.log(int(ws.cell(row=i, column=4).value)))
+        b_aext.append(ws.cell(row=i, column=11).value)
+        b_nums.append(ws.cell(row=i, column=12).value)
+        b_len.append(ws.cell(row=i, column=2).value)
+
+    b_len = [len(word) for word in b_len]
+
+    b_conc, b_concp = [], []
+    bnc = load_workbook(filename='BNC - Noun, Verb, Adj, Adv only - Valid Only - With Concrete.xlsx')
+    ws = bnc.active
+
+    for i in range(2, 502):
+        b_conc.append(ws.cell(row=i, column=8).value)
+        b_concp.append(ws.cell(row=i, column=9).value)
+
+    def t_test(data):
+        stat = round(ttest_1samp(data, 0)[0], 5)
+        p = round(ttest_1samp(data, 0)[1], 5)
+        return stat, p
+
+    #Histogram of Pearsons
+
+    ax0.hist(b_pear, 25, range=(-1,1))
+    ax0.axvline(np.mean(b_pear), color='r', linestyle='dashed', linewidth=2)
+    ax0.axvline(np.median(b_pear), color='r', linewidth=2)
+    ax0.set_title('Pearson Histogram - T-Stat, P-Value: \n' + str(t_test(b_pear)))
+
+    #Scatterplots:
+
+    write_scatterplot(b_freq, b_pear, ax1, "Log(Freq) vs. Pearson")
+    write_scatterplot(b_freq, b_nums, ax2, "Log(Freq) vs. Num Senses")
+    write_scatterplot(b_freq, b_aext, ax3, "Log(Freq) vs. Externality")
+    write_scatterplot(b_aext, b_pear, ax4, "Externality vs. Pearson")
+    write_scatterplot(b_aext, b_nums, ax5, "Externality vs. Num Senses")
+    write_scatterplot(b_len, b_nums, ax6, "Length vs. Num Senses")
+    write_scatterplot(b_len, b_aext, ax7, "Length vs. Externality")
+    write_scatterplot(b_conc, b_concp, ax8, "Concreteness vs. Pearson")
+
+    fig.subplots_adjust(hspace=.5)
+    plt.show()
+
+def write_definitive_swadesh():
+
+    s_pear, s_freq, s_aext, s_nums, s_len = [], [], [], [], []
+    bnc = load_workbook(filename='Swadesh List.xlsx')
+    ws = bnc.active
+
+    fig, axes = plt.subplots(nrows=2, ncols=5)
+    ax0, ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8, ax9 = axes.flat
+
+    for i in range(2, 201):
+        if ws.cell(row=i, column=2).value and ws.cell(row=i, column=4).value != "Not Viable":
+            s_freq.append(np.log(int(ws.cell(row=i, column=2).value)))
+            s_pear.append(ws.cell(row=i, column=3).value)
+            s_aext.append(ws.cell(row=i, column=4).value)
+            s_nums.append(ws.cell(row=i, column=5).value)
+            s_len.append(ws.cell(row=i, column=1).value)
+
+    s_len = [len(word) for word in s_len]
+
+    #s_conc, s_concp = [], []
+    bnc = load_workbook(filename='Swadesh List.xlsx')
+    ws = bnc.active
+
+    """for i in range(2, 502):
+        s_conc.append(ws.cell(row=i, column=8).value)
+        s_concp.append(ws.cell(row=i, column=9).value)"""
+
+    def t_test(data):
+        stat = round(ttest_1samp(data, 0)[0], 5)
+        p = round(ttest_1samp(data, 0)[1], 5)
+        return stat, p
+
+    #Histogram of Pearsons
+
+    ax0.hist(s_pear, 25, range=(-1, 1))
+    ax0.axvline(np.mean(s_pear), color='r', linestyle='dashed', linewidth=2)
+    ax0.axvline(np.median(s_pear), color='r', linewidth=2)
+    ax0.set_title('Pearson Histogram - T-Stat, P-Value: \n' + str(t_test(s_pear)))
+
+    #Scatterplots:
+
+    write_scatterplot(s_freq, s_pear, ax1, "Log(Freq) vs. Pearson")
+    write_scatterplot(s_freq, s_nums, ax2, "Log(Freq) vs. Num Senses")
+    write_scatterplot(s_freq, s_aext, ax3, "Log(Freq) vs. Externality")
+    write_scatterplot(s_aext, s_pear, ax4, "Externality vs. Pearson")
+    write_scatterplot(s_aext, s_nums, ax5, "Externality vs. Num Senses")
+    write_scatterplot(s_len, s_nums, ax6, "Length vs. Num Senses")
+    write_scatterplot(s_len, s_aext, ax7, "Length vs. Externality")
+    #write_scatterplot(s_conc, s_concp, ax8, "Concreteness vs. Pearson")
+
+    fig.subplots_adjust(hspace=.5)
+    plt.show()
+
 def write_5_by_2_std_plot(before, limited):
 
     if before:
@@ -342,9 +447,9 @@ def write_5_by_2_std_plot(before, limited):
     fig, axes = plt.subplots(nrows=5, ncols=2)
     ax0, ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8, ax9 = axes.flat
 
-    def t_test(set):#rewrite set
-        stat = ttest_1samp(set, 0)[0]
-        p = ttest_1samp(set, 0)[1]
+    def t_test(data):
+        stat = ttest_1samp(data, 0)[0]
+        p = ttest_1samp(data, 0)[1]
         return stat, p
 
     if limited:
@@ -529,4 +634,15 @@ def write_3_by_2_misc(before, limited, title):
 
     fig.subplots_adjust(hspace=.5)
     plt.show()
+
+def write_scatterplot(x, y, axis, title):
+    axis.scatter(x, y)
+    slope = np.polyfit(x, y, 1)
+    lx, ly = round(np.polyfit(x, y, 1)[0], 5) , round(np.polyfit(x, y, 1)[1], 5)
+    slope_str = "y = " + str(ly) + " + " + str(lx) + "x"
+    pearson_r, pearson_p = pearsonr(x, y)
+    pearson_r, pearson_p = round(float(pearson_r), 5), round(float(pearson_p), 5)
+    pearson_str = "Pearson(r, p) : (" + str(pearson_r) + ", " + str(pearson_p) + ")"
+    axis.plot(x, numpy.poly1d(slope)(x))
+    axis.set_title(title + "\n" + slope_str + "\n" + pearson_str)
 
